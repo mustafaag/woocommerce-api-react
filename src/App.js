@@ -7,7 +7,8 @@ class App extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      data: []
+      data: [],
+      total: 0
     };
   }
   componentDidMount() {
@@ -15,10 +16,15 @@ class App extends Component {
   }
 
   getAllProducts = () => {
-    woocomApi.get('products/').then(
+    woocomApi.get('products').then(
       res =>{
+        let tot = 0;
+        res.data.map(d=>{
+          tot = d.stock_quantity? tot+ d.stock_quantity : tot+1
+        })
         this.setState({
-          data: res.data
+          data: res.data,
+          total: tot
         })
         console.log(res);
       }
@@ -33,10 +39,14 @@ class App extends Component {
       attribute_term: id
     }).then(
       res =>{
-        this.setState({
-          data: res.data
+        let tot = 0;
+        res.data.map(d=>{
+          tot = d.stock_quantity? tot+ d.stock_quantity : tot+1
         })
-        console.log(res);
+        this.setState({
+          data: res.data,
+          total: tot
+        })
       }
     ).catch(e =>{
       console.log(e);
@@ -73,6 +83,7 @@ class App extends Component {
                     <span className="card-title">{d.name}</span>
                     <p>{d.description}</p>
                     <p className="grey-text">{d.price}</p>
+                    <p>Stock : {d.stock_quantity? d.stock_quantity: 1}</p>
                     {this.renderAttributes(d.attributes)}
                 </div>
             </div>
@@ -81,6 +92,7 @@ class App extends Component {
     })): null
     return (
       <div className="dashboard container">
+        <h2>Total {this.state.total}</h2>
        {datas}
        <div className="row">
          <input type="text" onChange={this.setColor} placeholder="Set Color"/>
